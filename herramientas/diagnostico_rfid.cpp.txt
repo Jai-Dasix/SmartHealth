@@ -1,0 +1,39 @@
+#include <Arduino.h>
+#include <SPI.h>
+#include <MFRC522.h>
+
+#define SS_PIN 5
+#define RST_PIN 27 
+
+MFRC522 rfid(SS_PIN, RST_PIN);
+
+void setup() {
+  Serial.begin(115200);
+  
+  SPI.begin(); 
+  rfid.PCD_Init();
+  
+  Serial.println("\n--- DIAGNÓSTICO DEL LECTOR ---");
+  // Esta línea le pregunta la versión al chip interno
+  rfid.PCD_DumpVersionToSerial();
+  Serial.println("------------------------------");
+  
+  Serial.println("Acerca tu llavero...");
+}
+
+void loop() {
+  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
+    String codigoTarjeta = "";
+    for (byte i = 0; i < rfid.uid.size; i++) {
+      if (rfid.uid.uidByte[i] < 0x10) { codigoTarjeta += "0"; }
+      codigoTarjeta += String(rfid.uid.uidByte[i], HEX);
+    }
+    codigoTarjeta.toUpperCase();
+    
+    Serial.print(">>> CÓDIGO DETECTADO: ");
+    Serial.println(codigoTarjeta);
+    
+    rfid.PICC_HaltA(); 
+    delay(1500); 
+  }
+}

@@ -1,0 +1,50 @@
+#include <Arduino.h>
+#include <HX711.h>
+
+HX711 bascula;
+const int DT_PIN = 16;
+const int SCK_PIN = 4;
+
+// Inicia con un valor por defecto. Lo ajustaremos en vivo.
+float factorDeEscala = 1000.0; 
+
+void setup() {
+  Serial.begin(115200);
+  Serial.setTimeout(10); // Respuesta rápida del teclado
+  
+  Serial.println("\n--- MODO DE CALIBRACIÓN DE BÁSCULA ---");
+  Serial.println("1. Retira cualquier peso de la báscula.");
+  Serial.println("2. Espera a que la tara termine...");
+  
+  bascula.begin(DT_PIN, SCK_PIN);
+  bascula.set_scale();
+  bascula.tare(); // Pone a 0
+  
+  Serial.println("Tara completada. La báscula está en cero.");
+  Serial.println("\n>>> INSTRUCCIONES <<<");
+  Serial.println("- Coloca un peso EXACTO conocido sobre la báscula (ej. un paquete de 1kg).");
+  Serial.println("- Envía 'a' en el monitor serie para SUMAR 10 al factor.");
+  Serial.println("- Envía 'z' en el monitor serie para RESTAR 10 al factor.");
+  Serial.println("- Envía 's' para sumar 100, y 'x' para restar 100.");
+  Serial.println("OBJETIVO: Lograr que la lectura coincida con tu peso real.\n");
+}
+
+void loop() {
+  bascula.set_scale(factorDeEscala);
+  float pesoLeido = bascula.get_units(3); // Promedio de 3 lecturas rápidas
+  
+  Serial.print("Lectura actual: ");
+  Serial.print(pesoLeido, 2); // Muestra 2 decimales
+  Serial.print(" | Factor de Escala actual: ");
+  Serial.println(factorDeEscala);
+
+  if (Serial.available()) {
+    char letra = Serial.read();
+    if (letra == 'a') factorDeEscala += 10;
+    else if (letra == 'z') factorDeEscala -= 10;
+    else if (letra == 's') factorDeEscala += 100;
+    else if (letra == 'x') factorDeEscala -= 100;
+  }
+  
+  delay(500); // Actualiza la pantalla cada medio segundo
+}
