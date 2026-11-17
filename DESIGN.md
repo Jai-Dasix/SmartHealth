@@ -2,7 +2,7 @@
 
 Estación de triaje nutricional automatizada para control pediátrico (hasta 50 cm y 5 kg).
 
-**Autor:** Jaimar David Salazar Cabrera · Noviembre de 2026
+**Autor:** Jaimar David Salazar Cabrera · 15 Noviembre de 2026
 
 ## 1. Introducción
 
